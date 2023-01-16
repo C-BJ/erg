@@ -5,7 +5,7 @@ use std::process;
 use std::thread::sleep;
 use std::time::Duration;
 
-use crossterm;
+use crossterm::terminal;
 
 use erg_common::config::ErgConfig;
 use erg_common::error::MultiErrorDisplay;
@@ -106,9 +106,9 @@ impl Runnable for DummyVM {
                 Result::Ok(n) => {
                     let s = std::str::from_utf8(&buf[..n]).unwrap();
                     if s.contains("clear") {
-                        crossterm::terminal::Clear(crossterm::terminal::ClearType::All);
+                        terminal::Clear(terminal::ClearType::All);
                     }
-                    else if s.contains("exit") && !self.cfg().quiet_repl {
+                    else if s.contains("closed") && !self.cfg().quiet_repl {
                         println!("The REPL server is closed.");
                     }
                 }

@@ -20,7 +20,7 @@ while True:
         __client_socket.send('clear'.encode())
         break
     elif __order == 'exit' or __order == 'quit':
-        __client_socket.send('exit'.encode())
+        __client_socket.send('closed'.encode())
         break
     elif __order == 'load':
         __sys.stdout = __io.StringIO()
