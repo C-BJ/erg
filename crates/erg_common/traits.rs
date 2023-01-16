@@ -580,7 +580,11 @@ pub trait Runnable: Sized + Default {
                 let mut in_block = false;
                 let mut lines = String::new();
                 loop {
-                    let line = chomp(&instance.input().read());
+                    let line_t= chomp(&instance.input().read());
+                    let line = {
+                        let ref this = line_t;
+                        this.trim_matches(|c: char| c.is_whitespace())
+                    };
                     match &line[..] {
                         ":quit" | ":exit" => {
                             instance.quit_successfully(output);
