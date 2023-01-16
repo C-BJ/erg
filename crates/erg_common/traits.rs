@@ -593,11 +593,6 @@ pub trait Runnable: Sized + Default {
                             instance.clear();
                             continue;
                         }
-                        "" => {
-                            output.write_all(instance.ps1().as_bytes()).unwrap();
-                            output.flush().unwrap();
-                            continue;
-                        }
                         _ => {}
                     }
                     let line = if let Some(comment_start) = line.find('#') {
@@ -624,7 +619,11 @@ pub trait Runnable: Sized + Default {
 
                     match instance.eval(mem::take(&mut lines)) {
                         Ok(out) => {
-                            output.write_all((out + "\n").as_bytes()).unwrap();
+                            if out.is_empty() {
+                                output.write_all((out).as_bytes()).unwrap();
+                            } else {
+                                output.write_all((out + "\n").as_bytes()).unwrap();
+                            }
                             output.flush().unwrap();
                         }
                         Err(errs) => {
