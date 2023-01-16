@@ -593,6 +593,11 @@ pub trait Runnable: Sized + Default {
                             instance.clear();
                             continue;
                         }
+                        "" => {
+                            output.write_all(instance.ps1().as_bytes()).unwrap();
+                            output.flush().unwrap();
+                            continue;
+                        }
                         _ => {}
                     }
                     let line = if let Some(comment_start) = line.find('#') {
