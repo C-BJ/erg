@@ -16,10 +16,7 @@ __res = ''
 
 while True:
     __order = __client_socket.recv(1024).decode()
-    if __order == 'quit' or __order == 'exit':
-        __client_socket.send('closed'.encode())
-        break
-    elif __order == 'load':
+    if __order == 'load':
         __sys.stdout = __io.StringIO()
         try:
             if __already_loaded:
