@@ -196,7 +196,7 @@ impl Compiler {
         let arti = self.compile(src, mode)?;
         arti.object
             .dump_as_pyc(pyc_path, self.cfg.py_magic_num)
-            .expect("failed to dump a .pyc file (maybe permission denied)");
+            .expect("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
         Ok(arti.warns)
     }
 
@@ -209,7 +209,7 @@ impl Compiler {
         let arti = self.eval_compile(src, mode)?;
         let (code, last) = arti.object;
         code.dump_as_pyc(pyc_path, self.cfg.py_magic_num)
-            .expect("failed to dump a .pyc file (maybe permission denied)");
+            .expect("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
         Ok(CompleteArtifact::new(last, arti.warns))
     }
 
