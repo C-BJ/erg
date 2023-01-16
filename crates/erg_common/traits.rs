@@ -582,8 +582,8 @@ pub trait Runnable: Sized + Default {
                 loop {
                     let line_t= chomp(&instance.input().read());
                     let line = {
-                        let ref this = line_t;
-                        this.trim_matches(|c: char| c.is_whitespace())
+                        let this = &line_t;
+                        this.trim_matches(|c: char| c.is_whitespace()).to_string()
                     };
                     match &line[..] {
                         ":quit" | ":exit" => {
