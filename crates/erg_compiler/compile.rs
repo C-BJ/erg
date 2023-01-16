@@ -194,9 +194,13 @@ impl Compiler {
         mode: &str,
     ) -> Result<CompileWarnings, ErrorArtifact> {
         let arti = self.compile(src, mode)?;
-        arti.object
-            .dump_as_pyc(pyc_path, self.cfg.py_magic_num)
-            .expect("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
+        match arti.object.dump_as_pyc(pyc_path, self.cfg.py_magic_num){
+            Ok(_) => {}
+            Err(_) => {
+                eprintln!("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
+                std::process::exit(1);
+            }
+        };
         Ok(arti.warns)
     }
 
@@ -208,8 +212,13 @@ impl Compiler {
     ) -> Result<CompleteArtifact<Option<Expr>>, ErrorArtifact> {
         let arti = self.eval_compile(src, mode)?;
         let (code, last) = arti.object;
-        code.dump_as_pyc(pyc_path, self.cfg.py_magic_num)
-            .expect("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
+        match code.dump_as_pyc(pyc_path, self.cfg.py_magic_num){
+            Ok(_) => {}
+            Err(_) => {
+                eprintln!("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
+                std::process::exit(1);
+            }
+        };
         Ok(CompleteArtifact::new(last, arti.warns))
     }
 
