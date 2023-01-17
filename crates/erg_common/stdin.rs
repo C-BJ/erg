@@ -41,12 +41,24 @@ impl StdinReader {
                     execute!(output, Print("\n".to_string())).unwrap();
                     return ":exit".to_string();
                 }
+                (KeyCode::Home, ..) => {
+                    position = 0;
+                }
+                (KeyCode::End, ..) => {
+                    position = line.len();
+                }
                 (KeyCode::Backspace, ..) => {
                     if position == 0 {
                         continue;
                     }
                     line.remove(position - 1);
                     position -= 1;
+                }
+                (KeyCode::Delete, ..) => {
+                    if position == line.len() {
+                        continue;
+                    }
+                    line.remove(position);
                 }
                 (KeyCode::Enter, ..) => {
                     break;
