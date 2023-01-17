@@ -10,7 +10,6 @@ use std::process;
 use std::slice::{Iter, IterMut};
 
 use crossterm::{execute, style::Print};
-use crossterm::cursor::{SetCursorShape,CursorShape};
 
 use crate::config::{ErgConfig, Input};
 use crate::consts::{BUILD_DATE, GIT_HASH_SHORT, SEMVER};
@@ -568,7 +567,7 @@ pub trait Runnable: Sized + Default {
     }
     fn run(cfg: ErgConfig) {
         crossterm::terminal::enable_raw_mode().unwrap();
-        execute!(std::io::stdout(),SetCursorShape(CursorShape::Line)).unwrap();
+        
         let quiet_repl = cfg.quiet_repl;
         let mut instance = Self::new(cfg);
         let res = match instance.input() {

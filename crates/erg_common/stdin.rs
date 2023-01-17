@@ -7,6 +7,9 @@ use crossterm::{execute, style::Print};
 use crossterm::terminal::{Clear, ClearType};
 use crossterm::cursor::MoveToColumn;
 
+
+use crossterm::cursor::{SetCursorShape,CursorShape};
+
 /// e.g.
 /// ```erg
 /// >>> print! 1
@@ -26,6 +29,7 @@ pub struct StdinReader {
 
 impl StdinReader {
     pub fn read(&mut self) -> String {
+        execute!(std::io::stdout(),SetCursorShape(CursorShape::Line)).unwrap();
         let mut output = std::io::stdout();
         let mut line = String::new();
         let mut position:usize = 0;
