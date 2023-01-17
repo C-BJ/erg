@@ -583,7 +583,7 @@ pub trait Runnable: Sized + Default {
                         IN_BLOCK = in_block;
                     }
                     let mut lines = String::new();
-                    let line_t = chomp(&instance.input().read());
+                    let line_t = chomp(&instance.cfg_mut().input.read());
                     let line = {
                         let this = &line_t;
                         this.trim_matches(|c: char| c.is_whitespace()).to_string()
