@@ -2,10 +2,10 @@ use crate::traits::IN_BLOCK;
 use std::cell::RefCell;
 use std::thread::LocalKey;
 
-use crossterm::{execute, style::Print};
-use crossterm::terminal::{Clear, ClearType};
+use crossterm::cursor::{CursorShape, MoveToColumn, SetCursorShape};
 use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
-use crossterm::cursor::{MoveToColumn, CursorShape, SetCursorShape};
+use crossterm::terminal::{Clear, ClearType};
+use crossterm::{execute, style::Print};
 
 /// e.g.
 /// ```erg
