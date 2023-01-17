@@ -5,6 +5,7 @@ use crate::traits::IN_BLOCK;
 use crossterm::event::{read, Event,KeyCode, KeyEvent, KeyModifiers};
 use crossterm::{execute, style::Print};
 use crossterm::terminal::{Clear, ClearType};
+use crossterm::cursor::MoveToColumn;
 
 /// e.g.
 /// ```erg
@@ -27,6 +28,7 @@ impl StdinReader {
     pub fn read(&mut self) -> String {
         let mut output = std::io::stdout();
         let mut line = String::new();
+        let mut position:usize = 0;
         loop {
             match read().unwrap() {
                 Event::Key(KeyEvent {code: KeyCode::Char('z'),  modifiers: KeyModifiers::CONTROL, ..}) => {
@@ -39,7 +41,22 @@ impl StdinReader {
                 Event::Key(KeyEvent {code: KeyCode::Enter, .. }) => {
                     break;
                 }
-                Event::Key(KeyEvent {code: KeyCode::Char(c), ..}) => {line.push(c);}
+                Event::Key(KeyEvent {code: KeyCode::Left, .. }) => {
+                    if position <= 0 {
+                        continue;
+                    }
+                    position -= 1;
+                }
+                Event::Key(KeyEvent {code: KeyCode::Right, .. }) => {
+                    if position >= line.len() {
+                        continue;
+                    }
+                    position += 1;
+                }
+                Event::Key(KeyEvent {code: KeyCode::Char(c), ..}) => {
+                    line.insert(position, c);
+                    position += 1;
+                }
                 _ => {}
             }
             print!("{}\r", Clear(ClearType::CurrentLine));
@@ -50,6 +67,7 @@ impl StdinReader {
                     execute!(output, Print(">>> ".to_owned() + &line)).unwrap();
                 }
             }
+            execute!(output,MoveToColumn(position as u16 + 4)).unwrap();
         }
         let buf = {
             let this = &line;
