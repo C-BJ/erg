@@ -24,6 +24,8 @@ use crossterm::cursor::{CursorShape, SetCursorShape};
 pub struct StdinReader {
     pub lineno: usize,
     buf: Vec<String>,
+    history_input: Vec<String>,
+    history_input_position: usize,
 }
 
 impl StdinReader {
@@ -33,10 +35,12 @@ impl StdinReader {
         execute!(output, SetCursorShape(CursorShape::Line)).unwrap();
         let mut line = String::new();
         let mut position = 0;
+        let mut consult_history = false;
         while let Event::Key(KeyEvent {
             code, modifiers, ..
         }) = read().unwrap()
         {
+            consult_history = false;
             match (code, modifiers) {
                 (KeyCode::Char('z'), KeyModifiers::CONTROL) => {
                     execute!(output, Print("\n".to_string())).unwrap();
@@ -63,6 +67,37 @@ impl StdinReader {
                 }
                 (KeyCode::Enter, ..) => {
                     break;
+                }
+                (KeyCode::Up, ..) => {
+                    consult_history = true;
+                    if self.history_input_position == 0 {
+                        continue;
+                    }
+                    self.history_input_position -= 1;
+                    line = self.history_input[self.history_input_position].clone();
+                    position = line.len();
+                }
+                (KeyCode::Down, ..) => {
+                    if self.history_input_position == self.history_input.len() {
+                        continue;
+                    }
+                    if self.history_input_position == self.history_input.len() - 1 {
+                        line = "".to_string();
+                        position = 0;
+                        self.history_input_position += 1;
+                        print!("{}\r", Clear(ClearType::CurrentLine));
+                        unsafe {
+                            if IN_BLOCK {
+                                execute!(output, Print("... ".to_owned())).unwrap();
+                            } else {
+                                execute!(output, Print(">>> ".to_owned())).unwrap();
+                            }
+                        }
+                        continue;
+                    }
+                    self.history_input_position += 1;
+                    line = self.history_input[self.history_input_position].clone();
+                    position = line.len();
                 }
                 (KeyCode::Left, ..) => {
                     if position == 0 {
@@ -97,6 +132,12 @@ impl StdinReader {
             let this = &line;
             this.trim_matches(|c: char| c.is_whitespace()).to_string()
         };
+        if !consult_history {
+            if !buf.is_empty() {
+                self.history_input.push(buf.clone());
+            }
+            self.history_input_position = self.history_input.len();
+        }
         self.lineno += 1;
         self.buf.push(buf);
         self.buf.last().cloned().unwrap_or_default()
@@ -112,7 +153,7 @@ impl StdinReader {
 }
 
 thread_local! {
-    static READER: RefCell<StdinReader> = RefCell::new(StdinReader{ lineno: 0, buf: vec![] });
+    static READER: RefCell<StdinReader> = RefCell::new(StdinReader{ lineno: 0, buf: vec![], history_input: Vec::new(), history_input_position: 0});
 }
 
 #[derive(Debug)]
