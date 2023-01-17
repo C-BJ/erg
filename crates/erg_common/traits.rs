@@ -9,10 +9,12 @@ use std::mem;
 use std::process;
 use std::slice::{Iter, IterMut};
 
+use crossterm::{execute, style::Print};
+
 use crate::config::{ErgConfig, Input};
 use crate::consts::{BUILD_DATE, GIT_HASH_SHORT, SEMVER};
 use crate::error::{ErrorDisplay, ErrorKind, Location, MultiErrorDisplay};
-use crate::{addr_eq, chomp, log, switch_unreachable};
+use crate::{chomp, addr_eq, log, switch_unreachable};
 
 pub trait DequeStream<T>: Sized {
     fn payload(self) -> VecDeque<T>;
@@ -562,6 +564,8 @@ pub trait Runnable: Sized + Default {
     }
 
     fn run(cfg: ErgConfig) {
+        crossterm::terminal::enable_raw_mode().unwrap();
+
         let quiet_repl = cfg.quiet_repl;
         let mut instance = Self::new(cfg);
         let res = match instance.input() {
@@ -578,17 +582,14 @@ pub trait Runnable: Sized + Default {
                 output.write_all(instance.ps1().as_bytes()).unwrap();
                 output.flush().unwrap();
                 let mut in_block = false;
-                let mut lines = String::new();
                 loop {
-                    let line_t= chomp(&instance.input().read());
+                    let mut lines = String::new();
+                    let line_t = chomp(&instance.input().read());
                     let line = {
                         let this = &line_t;
                         this.trim_matches(|c: char| c.is_whitespace()).to_string()
                     };
                     match &line[..] {
-                        ":quit" | ":exit" => {
-                            instance.quit_successfully(output);
-                        }
                         ":clear" => {
                             output.write_all("\x1b[2J\x1b[1;1H".as_bytes()).unwrap();
                             output.flush().unwrap();
@@ -597,8 +598,19 @@ pub trait Runnable: Sized + Default {
                             instance.clear();
                             continue;
                         }
+                        ":quit" | ":exit" => {
+                            instance.quit_successfully(output);
+                        }
+                        "" => {
+                            execute!(output, Print("\n".to_string())).unwrap();
+                            output.write_all(instance.ps1().as_bytes()).unwrap();
+                            output.flush().unwrap();
+                            instance.clear();
+                            continue;
+                        }
                         _ => {}
                     }
+                    execute!(output, Print("\n".to_string())).unwrap();
                     let line = if let Some(comment_start) = line.find('#') {
                         &line[..comment_start]
                     } else {
@@ -623,12 +635,10 @@ pub trait Runnable: Sized + Default {
 
                     match instance.eval(mem::take(&mut lines)) {
                         Ok(out) => {
-                            if out.is_empty() {
-                                output.write_all((out).as_bytes()).unwrap();
-                            } else {
+                            if !out.is_empty() {
                                 output.write_all((out + "\n").as_bytes()).unwrap();
-                            }
-                            output.flush().unwrap();
+                                output.flush().unwrap();
+                            }                
                         }
                         Err(errs) => {
                             if errs
@@ -645,6 +655,7 @@ pub trait Runnable: Sized + Default {
                     output.flush().unwrap();
                     instance.clear();
                 }
+                
             }
             Input::Dummy => switch_unreachable!(),
         };

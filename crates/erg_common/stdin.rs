@@ -1,6 +1,9 @@
 use std::cell::RefCell;
-use std::io::{stdin, BufRead, BufReader};
 use std::thread::LocalKey;
+
+use crossterm::event::{read, Event,KeyCode, KeyEvent, KeyModifiers};
+use crossterm::{execute, style::Print};
+use crossterm::terminal::{Clear, ClearType};
 
 /// e.g.
 /// ```erg
@@ -21,10 +24,22 @@ pub struct StdinReader {
 
 impl StdinReader {
     pub fn read(&mut self) -> String {
-        let mut buf = "".to_string();
-        let stdin = stdin();
-        let mut reader = BufReader::new(stdin.lock());
-        reader.read_line(&mut buf).unwrap();
+        let mut output = std::io::stdout();
+        let mut buf = String::new();
+        loop {
+            match read().unwrap() {
+                Event::Key(KeyEvent {code: KeyCode::Char('z'),  modifiers: KeyModifiers::CONTROL, ..}) => {
+                    execute!(output, Print("\n".to_string())).unwrap();
+                    return ":exit".to_string();
+                }
+                Event::Key(KeyEvent {code: KeyCode::Enter, .. }) => {
+                    break;
+                }
+                Event::Key(KeyEvent {code: KeyCode::Char(c), ..}) => {buf.push(c);}
+                _ => {}
+            }
+            Clear(ClearType::UntilNewLine);
+        }
         self.lineno += 1;
         self.buf.push(buf);
         self.buf.last().cloned().unwrap_or_default()
