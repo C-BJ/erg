@@ -1,12 +1,11 @@
+use crate::traits::IN_BLOCK;
 use std::cell::RefCell;
 use std::thread::LocalKey;
 
-use crossterm::cursor::{CursorShape, MoveToColumn, SetCursorShape};
-use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
-use crossterm::terminal::{Clear, ClearType};
 use crossterm::{execute, style::Print};
-
-use crate::traits::IN_BLOCK;
+use crossterm::terminal::{Clear, ClearType};
+use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::cursor::{MoveToColumn, CursorShape, SetCursorShape};
 
 /// e.g.
 /// ```erg
