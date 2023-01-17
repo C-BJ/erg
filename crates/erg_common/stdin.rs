@@ -25,6 +25,7 @@ use crossterm::cursor::{SetCursorShape,CursorShape};
 pub struct StdinReader {
     pub lineno: usize,
     buf: Vec<String>,
+
 }
 
 impl StdinReader {
@@ -34,35 +35,35 @@ impl StdinReader {
         execute!(output,SetCursorShape(CursorShape::Line)).unwrap();
         let mut line = String::new();
         let mut position = 0;
-        while let event = read().unwrap() {
-            match event{
-                Event::Key(KeyEvent {code: KeyCode::Char('z'),  modifiers: KeyModifiers::CONTROL, ..}) => {
+        while let Event::Key(KeyEvent {code, modifiers, .. }) = read().unwrap() {
+            match (code, modifiers){
+                (KeyCode::Char('z'), KeyModifiers::CONTROL) => {
                     execute!(output, Print("\n".to_string())).unwrap();
                     return ":exit".to_string();
                 }
-                Event::Key(KeyEvent {code: KeyCode::Backspace, ..}) => {
+                (KeyCode::Backspace, ..) => {
                     if position == 0 {
                         continue;
                     }
                     line.remove(position - 1);
                     position -= 1;
                 }
-                Event::Key(KeyEvent {code: KeyCode::Enter, .. }) => {
+                (KeyCode::Enter, ..) => {
                     break;
                 }
-                Event::Key(KeyEvent {code: KeyCode::Left, .. }) => {
+                (KeyCode::Left, .. ) => {
                     if position == 0 {
                         continue;
                     }
                     position -= 1;
                 }
-                Event::Key(KeyEvent {code: KeyCode::Right, .. }) => {
+                (KeyCode::Right, ..) => {
                     if position == line.len() {
                         continue;
                     }
                     position += 1;
                 }
-                Event::Key(KeyEvent {code: KeyCode::Char(c), ..}) => {
+                (KeyCode::Char(c), ..) => {
                     line.insert(position, c);
                     position += 1;
                 }
