@@ -1,14 +1,13 @@
+use crate::traits::IN_BLOCK;
 use std::cell::RefCell;
 use std::thread::LocalKey;
-use crate::traits::IN_BLOCK;
 
-use crossterm::event::{read, Event,KeyCode, KeyEvent, KeyModifiers};
-use crossterm::{execute, style::Print};
-use crossterm::terminal::{Clear, ClearType};
 use crossterm::cursor::MoveToColumn;
+use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::terminal::{Clear, ClearType};
+use crossterm::{execute, style::Print};
 
-
-use crossterm::cursor::{SetCursorShape,CursorShape};
+use crossterm::cursor::{CursorShape, SetCursorShape};
 
 /// e.g.
 /// ```erg
@@ -25,18 +24,20 @@ use crossterm::cursor::{SetCursorShape,CursorShape};
 pub struct StdinReader {
     pub lineno: usize,
     buf: Vec<String>,
-
 }
 
 impl StdinReader {
     pub fn read(&mut self) -> String {
         crossterm::terminal::enable_raw_mode().unwrap();
         let mut output = std::io::stdout();
-        execute!(output,SetCursorShape(CursorShape::Line)).unwrap();
+        execute!(output, SetCursorShape(CursorShape::Line)).unwrap();
         let mut line = String::new();
         let mut position = 0;
-        while let Event::Key(KeyEvent {code, modifiers, .. }) = read().unwrap() {
-            match (code, modifiers){
+        while let Event::Key(KeyEvent {
+            code, modifiers, ..
+        }) = read().unwrap()
+        {
+            match (code, modifiers) {
                 (KeyCode::Char('z'), KeyModifiers::CONTROL) => {
                     execute!(output, Print("\n".to_string())).unwrap();
                     return ":exit".to_string();
@@ -63,7 +64,7 @@ impl StdinReader {
                 (KeyCode::Enter, ..) => {
                     break;
                 }
-                (KeyCode::Left, .. ) => {
+                (KeyCode::Left, ..) => {
                     if position == 0 {
                         continue;
                     }
@@ -89,7 +90,7 @@ impl StdinReader {
                     execute!(output, Print(">>> ".to_owned() + &line)).unwrap();
                 }
             }
-            execute!(output,MoveToColumn(position as u16 + 4)).unwrap();
+            execute!(output, MoveToColumn(position as u16 + 4)).unwrap();
         }
         crossterm::terminal::disable_raw_mode().unwrap();
         let buf = {

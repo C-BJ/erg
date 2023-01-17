@@ -194,7 +194,7 @@ impl Compiler {
         mode: &str,
     ) -> Result<CompileWarnings, ErrorArtifact> {
         let arti = self.compile(src, mode)?;
-        match arti.object.dump_as_pyc(pyc_path, self.cfg.py_magic_num){
+        match arti.object.dump_as_pyc(pyc_path, self.cfg.py_magic_num) {
             Ok(_) => {}
             Err(_) => {
                 eprintln!("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");
@@ -212,7 +212,7 @@ impl Compiler {
     ) -> Result<CompleteArtifact<Option<Expr>>, ErrorArtifact> {
         let arti = self.eval_compile(src, mode)?;
         let (code, last) = arti.object;
-        match code.dump_as_pyc(pyc_path, self.cfg.py_magic_num){
+        match code.dump_as_pyc(pyc_path, self.cfg.py_magic_num) {
             Ok(_) => {}
             Err(_) => {
                 eprintln!("failed to dump a .pyc file (administrator permissions may be required to write to this directory)");

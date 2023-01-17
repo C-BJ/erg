@@ -14,7 +14,7 @@ use crossterm::{execute, style::Print};
 use crate::config::{ErgConfig, Input};
 use crate::consts::{BUILD_DATE, GIT_HASH_SHORT, SEMVER};
 use crate::error::{ErrorDisplay, ErrorKind, Location, MultiErrorDisplay};
-use crate::{chomp, addr_eq, log, switch_unreachable};
+use crate::{addr_eq, chomp, log, switch_unreachable};
 
 pub static mut IN_BLOCK: bool = false;
 
@@ -532,17 +532,13 @@ pub trait Runnable: Sized + Default {
     }
     fn start_message(&self) -> String {
         if GIT_HASH_SHORT.is_empty() {
-            format!(
-                "{} {SEMVER} ({BUILD_DATE}) on {ARCH}/{OS}\n",
-                Self::NAME
-            )
+            format!("{} {SEMVER} ({BUILD_DATE}) on {ARCH}/{OS}\n", Self::NAME)
         } else {
             format!(
                 "{} {SEMVER} ({GIT_HASH_SHORT}, {BUILD_DATE}) on {ARCH}/{OS}\n",
                 Self::NAME
             )
         }
-        
     }
     fn ps1(&self) -> String {
         self.cfg().ps1.to_string()
@@ -565,7 +561,7 @@ pub trait Runnable: Sized + Default {
         process::exit(0);
     }
     fn run(cfg: ErgConfig) {
-        execute!(std::io::stdout(),crossterm::terminal::SetTitle("Erg REPL")).unwrap();
+        execute!(std::io::stdout(), crossterm::terminal::SetTitle("Erg REPL")).unwrap();
         let quiet_repl = cfg.quiet_repl;
         let mut instance = Self::new(cfg);
         let res = match instance.input() {
@@ -641,7 +637,7 @@ pub trait Runnable: Sized + Default {
                             if !out.is_empty() {
                                 output.write_all((out + "\n").as_bytes()).unwrap();
                                 output.flush().unwrap();
-                            }                
+                            }
                         }
                         Err(errs) => {
                             if errs
@@ -658,7 +654,6 @@ pub trait Runnable: Sized + Default {
                     output.flush().unwrap();
                     instance.clear();
                 }
-                
             }
             Input::Dummy => switch_unreachable!(),
         };
@@ -667,7 +662,6 @@ pub trait Runnable: Sized + Default {
             instance.quit(1);
         }
     }
-    
 }
 
 pub trait Locational {
