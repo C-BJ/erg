@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::thread::LocalKey;
+use crate::traits::IN_BLOCK;
 
 use crossterm::event::{read, Event,KeyCode, KeyEvent, KeyModifiers};
 use crossterm::{execute, style::Print};
@@ -25,21 +26,35 @@ pub struct StdinReader {
 impl StdinReader {
     pub fn read(&mut self) -> String {
         let mut output = std::io::stdout();
-        let mut buf = String::new();
+        let mut line = String::new();
         loop {
             match read().unwrap() {
                 Event::Key(KeyEvent {code: KeyCode::Char('z'),  modifiers: KeyModifiers::CONTROL, ..}) => {
                     execute!(output, Print("\n".to_string())).unwrap();
                     return ":exit".to_string();
                 }
+                Event::Key(KeyEvent {code: KeyCode::Backspace, ..}) => {
+                    line.pop();
+                }
                 Event::Key(KeyEvent {code: KeyCode::Enter, .. }) => {
                     break;
                 }
-                Event::Key(KeyEvent {code: KeyCode::Char(c), ..}) => {buf.push(c);}
+                Event::Key(KeyEvent {code: KeyCode::Char(c), ..}) => {line.push(c);}
                 _ => {}
             }
-            Clear(ClearType::UntilNewLine);
+            print!("{}\r", Clear(ClearType::CurrentLine));
+            unsafe {
+                if IN_BLOCK {
+                    execute!(output, Print("... ".to_owned() + &line)).unwrap();
+                } else {
+                    execute!(output, Print(">>> ".to_owned() + &line)).unwrap();
+                }
+            }
         }
+        let buf = {
+            let this = &line;
+            this.trim_matches(|c: char| c.is_whitespace()).to_string()
+        };
         self.lineno += 1;
         self.buf.push(buf);
         self.buf.last().cloned().unwrap_or_default()

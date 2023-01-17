@@ -16,6 +16,8 @@ use crate::consts::{BUILD_DATE, GIT_HASH_SHORT, SEMVER};
 use crate::error::{ErrorDisplay, ErrorKind, Location, MultiErrorDisplay};
 use crate::{chomp, addr_eq, log, switch_unreachable};
 
+pub static mut IN_BLOCK: bool = false;
+
 pub trait DequeStream<T>: Sized {
     fn payload(self) -> VecDeque<T>;
     fn ref_payload(&self) -> &VecDeque<T>;
@@ -562,7 +564,6 @@ pub trait Runnable: Sized + Default {
         }
         process::exit(0);
     }
-
     fn run(cfg: ErgConfig) {
         crossterm::terminal::enable_raw_mode().unwrap();
 
@@ -583,6 +584,9 @@ pub trait Runnable: Sized + Default {
                 output.flush().unwrap();
                 let mut in_block = false;
                 loop {
+                    unsafe {
+                        IN_BLOCK = in_block;
+                    }
                     let mut lines = String::new();
                     let line_t = chomp(&instance.input().read());
                     let line = {
