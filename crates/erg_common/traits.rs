@@ -565,6 +565,7 @@ pub trait Runnable: Sized + Default {
         process::exit(0);
     }
     fn run(cfg: ErgConfig) {
+        execute!(std::io::stdout(),crossterm::terminal::SetTitle("Erg REPL")).unwrap();
         let quiet_repl = cfg.quiet_repl;
         let mut instance = Self::new(cfg);
         let res = match instance.input() {

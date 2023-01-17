@@ -30,12 +30,12 @@ pub struct StdinReader {
 impl StdinReader {
     pub fn read(&mut self) -> String {
         crossterm::terminal::enable_raw_mode().unwrap();
-        execute!(std::io::stdout(),SetCursorShape(CursorShape::Line)).unwrap();
         let mut output = std::io::stdout();
+        execute!(output,SetCursorShape(CursorShape::Line)).unwrap();
         let mut line = String::new();
         let mut position = 0;
-        loop {
-            match read().unwrap() {
+        while let event = read().unwrap() {
+            match event{
                 Event::Key(KeyEvent {code: KeyCode::Char('z'),  modifiers: KeyModifiers::CONTROL, ..}) => {
                     execute!(output, Print("\n".to_string())).unwrap();
                     return ":exit".to_string();
