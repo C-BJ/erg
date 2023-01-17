@@ -562,12 +562,9 @@ pub trait Runnable: Sized + Default {
         if !self.cfg().quiet_repl {
             log!(info_f output, "The REPL has finished successfully.\n");
         }
-        crossterm::terminal::disable_raw_mode().unwrap();
         process::exit(0);
     }
     fn run(cfg: ErgConfig) {
-        crossterm::terminal::enable_raw_mode().unwrap();
-        
         let quiet_repl = cfg.quiet_repl;
         let mut instance = Self::new(cfg);
         let res = match instance.input() {
@@ -595,7 +592,7 @@ pub trait Runnable: Sized + Default {
                         this.trim_matches(|c: char| c.is_whitespace()).to_string()
                     };
                     match &line[..] {
-                        ":clear" => {
+                        ":clear" | ":cls" => {
                             output.write_all("\x1b[2J\x1b[1;1H".as_bytes()).unwrap();
                             output.flush().unwrap();
                             output.write_all(instance.ps1().as_bytes()).unwrap();

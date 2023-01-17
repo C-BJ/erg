@@ -29,10 +29,11 @@ pub struct StdinReader {
 
 impl StdinReader {
     pub fn read(&mut self) -> String {
+        crossterm::terminal::enable_raw_mode().unwrap();
         execute!(std::io::stdout(),SetCursorShape(CursorShape::Line)).unwrap();
         let mut output = std::io::stdout();
         let mut line = String::new();
-        let mut position:usize = 0;
+        let mut position = 0;
         loop {
             match read().unwrap() {
                 Event::Key(KeyEvent {code: KeyCode::Char('z'),  modifiers: KeyModifiers::CONTROL, ..}) => {
@@ -40,19 +41,23 @@ impl StdinReader {
                     return ":exit".to_string();
                 }
                 Event::Key(KeyEvent {code: KeyCode::Backspace, ..}) => {
-                    line.pop();
+                    if position == 0 {
+                        continue;
+                    }
+                    line.remove(position - 1);
+                    position -= 1;
                 }
                 Event::Key(KeyEvent {code: KeyCode::Enter, .. }) => {
                     break;
                 }
                 Event::Key(KeyEvent {code: KeyCode::Left, .. }) => {
-                    if position <= 0 {
+                    if position == 0 {
                         continue;
                     }
                     position -= 1;
                 }
                 Event::Key(KeyEvent {code: KeyCode::Right, .. }) => {
-                    if position >= line.len() {
+                    if position == line.len() {
                         continue;
                     }
                     position += 1;
@@ -73,6 +78,7 @@ impl StdinReader {
             }
             execute!(output,MoveToColumn(position as u16 + 4)).unwrap();
         }
+        crossterm::terminal::disable_raw_mode().unwrap();
         let buf = {
             let this = &line;
             this.trim_matches(|c: char| c.is_whitespace()).to_string()
