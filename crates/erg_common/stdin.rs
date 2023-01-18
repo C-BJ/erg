@@ -35,7 +35,7 @@ impl StdinReader {
     fn access_clipboard() -> String {
         if let Ok(str) = std::fs::read("/proc/sys/kernel/osrelease") {
             let str = std::str::from_utf8(&str).unwrap();
-            if !str.to_ascii_lowercase().find("microsoft") == None {
+            if str.to_ascii_lowercase().contains("microsoft") == true {
                 let output = Command::new("powershell")
                     .args(["get-clipboard"])
                     .output()
@@ -66,6 +66,7 @@ impl StdinReader {
                 .replace('\r', "")
         }
     }
+    
     #[cfg(target_os = "windows")]
     fn access_clipboard() -> String {
         let output = Command::new("powershell")
