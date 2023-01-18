@@ -114,8 +114,12 @@ impl StdinReader {
                     };
                     line.insert_str(position, &clipboard);
                     position += clipboard.len();
-                }
+                },
                 (_, KeyModifiers::CONTROL) => continue,
+                (KeyCode::Tab, _) => {
+                    line.insert_str(position, "    ");
+                    position += 4;
+                },
                 (KeyCode::Home, _) => {
                     position = 0;
                 }
