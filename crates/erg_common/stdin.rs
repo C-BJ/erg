@@ -27,7 +27,6 @@ use crossterm::{
 pub struct StdinReader {
     pub lineno: usize,
     buf: Vec<String>,
-    history_input: Vec<String>,
     history_input_position: usize,
 }
 impl StdinReader {
@@ -122,14 +121,14 @@ impl StdinReader {
                         continue;
                     }
                     self.history_input_position -= 1;
-                    line = self.history_input[self.history_input_position].clone();
+                    line = self.buf[self.history_input_position].clone();
                     position = line.len();
                 }
                 (KeyCode::Down, ..) => {
-                    if self.history_input_position == self.history_input.len() {
+                    if self.history_input_position == self.buf.len() {
                         continue;
                     }
-                    if self.history_input_position == self.history_input.len() - 1 {
+                    if self.history_input_position == self.buf.len() - 1 {
                         line = "".to_string();
                         position = 0;
                         self.history_input_position += 1;
@@ -144,7 +143,7 @@ impl StdinReader {
                         continue;
                     }
                     self.history_input_position += 1;
-                    line = self.history_input[self.history_input_position].clone();
+                    line = self.buf[self.history_input_position].clone();
                     position = line.len();
                 }
                 (KeyCode::Left, ..) => {
@@ -181,10 +180,7 @@ impl StdinReader {
             this.trim_matches(|c: char| c.is_whitespace()).to_string()
         };
         if !consult_history {
-            if !buf.is_empty() {
-                self.history_input.push(buf.clone());
-            }
-            self.history_input_position = self.history_input.len();
+            self.history_input_position = self.buf.len() + 1;
         }
         self.lineno += 1;
         self.buf.push(buf);
@@ -201,7 +197,7 @@ impl StdinReader {
 }
 
 thread_local! {
-    static READER: RefCell<StdinReader> = RefCell::new(StdinReader{ lineno: 0, buf: vec![], history_input: Vec::new(), history_input_position: 0});
+    static READER: RefCell<StdinReader> = RefCell::new(StdinReader{ lineno: 0, buf: vec![], history_input_position: 0});
 }
 
 #[derive(Debug)]
