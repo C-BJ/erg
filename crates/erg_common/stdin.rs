@@ -174,6 +174,7 @@ impl StdinReader {
                     position += 1;
                 }
                 (KeyCode::Enter, _) => {
+                    println!();
                     break;
                 }
                 (KeyCode::Char(c), _) => {
