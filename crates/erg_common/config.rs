@@ -130,6 +130,22 @@ impl Input {
         }
     }
 
+    pub fn lineno(&self) -> usize {
+        GLOBAL_STDIN.lineno()
+    }
+
+    pub fn block_begin(&self) -> usize {
+        GLOBAL_STDIN.block_begin()
+    }
+
+    pub fn set_block_begin(&self) {
+        GLOBAL_STDIN.set_block_begin(self.lineno())
+    }
+
+    pub fn insert_whitespace(&self, whitespace: &str) {
+        GLOBAL_STDIN.insert_whitespace(whitespace);
+    }
+
     pub fn enclosed_name(&self) -> &str {
         match self {
             Self::File(filename) => filename.to_str().unwrap_or("_"),

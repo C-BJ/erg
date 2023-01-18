@@ -8,7 +8,7 @@ use std::time::Duration;
 use erg_common::config::ErgConfig;
 use erg_common::error::MultiErrorDisplay;
 use erg_common::python_util::{exec_pyc, spawn_py};
-use erg_common::traits::Runnable;
+use erg_common::traits::{BlockKind, Runnable};
 
 use erg_compiler::hir::Expr;
 use erg_compiler::ty::HasType;
@@ -139,6 +139,40 @@ impl Runnable for DummyVM {
         let code = exec_pyc(&filename, self.cfg().py_command, &self.cfg().runtime_args);
         remove_file(&filename).unwrap();
         Ok(code.unwrap_or(1))
+    }
+
+    #[inline]
+    fn expect_block(&self, src: &str) -> BlockKind {
+        let multi_line_str = "\"\"\"";
+        if src.contains(multi_line_str) && src.rfind(multi_line_str) == src.find(multi_line_str) {
+            return BlockKind::MultiLineStr;
+        }
+        if src.ends_with("do!:") && !src.starts_with("do!:") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with("do:") && !src.starts_with("do:") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with(':') && !src.starts_with(':') {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with('=') && !src.starts_with('=') {
+            return BlockKind::Assignment;
+        }
+        if src.ends_with('.') && !src.starts_with('.') {
+            return BlockKind::ClassPub;
+        }
+        if src.ends_with("::") && !src.starts_with("::") {
+            return BlockKind::ClassPriv;
+        }
+        if src.ends_with("=>") && !src.starts_with("=>") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with("->") && !src.starts_with("->") {
+            return BlockKind::Lambda;
+        }
+
+        BlockKind::None
     }
 
     fn eval(&mut self, src: String) -> Result<String, EvalErrors> {

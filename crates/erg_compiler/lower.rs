@@ -8,7 +8,7 @@ use erg_common::dict;
 use erg_common::error::{Location, MultiErrorDisplay};
 use erg_common::set;
 use erg_common::set::Set;
-use erg_common::traits::{Locational, NoTypeDisplay, Runnable, Stream};
+use erg_common::traits::{BlockKind, Locational, NoTypeDisplay, Runnable, Stream};
 use erg_common::vis::Visibility;
 use erg_common::{fmt_option, fn_name, log, option_enum_unwrap, switch_lang, Str};
 
@@ -109,6 +109,40 @@ impl Runnable for ASTLowerer {
         artifact.warns.fmt_all_stderr();
         println!("{}", artifact.object);
         Ok(0)
+    }
+
+    #[inline]
+    fn expect_block(&self, src: &str) -> BlockKind {
+        let multi_line_str = "\"\"\"";
+        if src.contains(multi_line_str) && src.rfind(multi_line_str) == src.find(multi_line_str) {
+            return BlockKind::MultiLineStr;
+        }
+        if src.ends_with("do!:") && !src.starts_with("do!:") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with("do:") && !src.starts_with("do:") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with(':') && !src.starts_with(':') {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with('=') && !src.starts_with('=') {
+            return BlockKind::Assignment;
+        }
+        if src.ends_with('.') && !src.starts_with('.') {
+            return BlockKind::ClassPub;
+        }
+        if src.ends_with("::") && !src.starts_with("::") {
+            return BlockKind::ClassPriv;
+        }
+        if src.ends_with("=>") && !src.starts_with("=>") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with("->") && !src.starts_with("->") {
+            return BlockKind::Lambda;
+        }
+
+        BlockKind::None
     }
 
     fn eval(&mut self, src: String) -> Result<String, Self::Errs> {
