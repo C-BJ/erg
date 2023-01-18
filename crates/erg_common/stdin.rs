@@ -175,18 +175,20 @@ impl StdinReader {
             execute!(output, MoveToColumn(position as u16 + 4)).unwrap();
         }
         crossterm::terminal::disable_raw_mode().unwrap();
-        let buf = {
+        let line = {
             let this = &line;
             this.trim_matches(|c: char| c.is_whitespace()).to_string()
         };
         if !consult_history {
             self.history_input_position = self.buf.len() + 1;
         }
-        self.lineno += 1;
-        if !buf.is_empty() {
-            self.buf.push(buf);
+        
+        if !line.is_empty() {
+            self.lineno += 1;
+            self.buf.push(line);
+            return self.buf.last().cloned().unwrap_or_default()
         }
-        self.buf.last().cloned().unwrap_or_default()
+        "".to_string()
     }
 
     pub fn reread(&self) -> String {
