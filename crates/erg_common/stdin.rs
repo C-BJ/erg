@@ -183,7 +183,9 @@ impl StdinReader {
             self.history_input_position = self.buf.len() + 1;
         }
         self.lineno += 1;
-        self.buf.push(buf);
+        if !buf.is_empty() {
+            self.buf.push(buf);
+        }
         self.buf.last().cloned().unwrap_or_default()
     }
 
