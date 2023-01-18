@@ -11,7 +11,7 @@ use erg_common::error::Location;
 use erg_common::traits::{Locational, Runnable, Stream};
 
 use erg_compiler::artifact::BuildRunnable;
-use erg_compiler::hir::{Block, Call, ClassDef, Def, Expr, Signature, Lambda};
+use erg_compiler::hir::{Block, Call, ClassDef, Def, Expr, Lambda, Signature};
 use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
 
 use crate::server::{ELSResult, Server};
@@ -36,7 +36,11 @@ fn anot(ln: u32, col: u32, cont: String) -> InlayHint {
 
 fn type_anot<D: std::fmt::Display>(ln_end: u32, col_end: u32, ty: D, return_t: bool) -> InlayHint {
     let position = Position::new(ln_end - 1, col_end);
-    let string = if return_t { format!("): {ty}") } else { format!(": {ty}") };
+    let string = if return_t {
+        format!("): {ty}")
+    } else {
+        format!(": {ty}")
+    };
     let label = InlayHintLabel::String(string);
     let kind = Some(InlayHintKind::TYPE);
     InlayHint {
@@ -134,7 +138,7 @@ impl<Checker: BuildRunnable> Server<Checker> {
             );
             result.push(hint);
             if subr.params.parens.is_none() {
-                    let hint = anot(
+                let hint = anot(
                     subr.params.ln_begin().unwrap(),
                     subr.params.col_begin().unwrap(),
                     "(".to_string(),
@@ -228,15 +232,14 @@ impl<Checker: BuildRunnable> Server<Checker> {
             let index = if is_method { i + 1 } else { i };
             if let Some(name) = nd_ts.get(index).and_then(|pt| pt.name()) {
                 let (name, col_begin) = if arg_is_lambda {
-                    (format!(" {name}"), pos_arg.col_begin().unwrap().saturating_sub(1))
+                    (
+                        format!(" {name}"),
+                        pos_arg.col_begin().unwrap().saturating_sub(1),
+                    )
                 } else {
                     (name.to_string(), pos_arg.col_begin().unwrap())
                 };
-                let hint = param_anot(
-                    pos_arg.ln_begin().unwrap(),
-                    col_begin,
-                    name,
-                );
+                let hint = param_anot(pos_arg.ln_begin().unwrap(), col_begin, name);
                 result.push(hint);
             }
         }

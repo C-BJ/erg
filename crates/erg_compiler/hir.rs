@@ -1805,7 +1805,11 @@ impl HasType for SubrSignature {
 
 impl SubrSignature {
     pub const fn new(ident: Identifier, params: Params, return_t_spec: Option<TypeSpec>) -> Self {
-        Self { ident, params, return_t_spec }
+        Self {
+            ident,
+            params,
+            return_t_spec,
+        }
     }
 
     pub fn is_procedural(&self) -> bool {

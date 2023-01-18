@@ -616,7 +616,6 @@ pub trait Runnable: Sized + Default {
                         &line[..]
                     };
                     lines.push_str(line);
-
                     if in_block {
                         if is_in_the_expected_block(line, &lines, &mut in_block) {
                             lines += "\n";

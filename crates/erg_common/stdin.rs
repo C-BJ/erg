@@ -1,8 +1,8 @@
 use crate::traits::IN_BLOCK;
 use std::cell::RefCell;
 use std::process::Command;
-use std::thread::LocalKey;
 use std::process::Output;
+use std::thread::LocalKey;
 
 use crossterm::{
     cursor::{CursorShape, MoveToColumn, SetCursorShape},
@@ -35,27 +35,33 @@ impl StdinReader {
         if let Ok(str) = std::fs::read("/proc/sys/kernel/osrelease") {
             let str = std::str::from_utf8(&str).unwrap();
             if str.to_ascii_lowercase().contains("microsoft") {
-                return Some(Command::new("powershell")
-                    .args(["get-clipboard"])
-                    .output()
-                    .expect("failed to get clipboard"));
+                return Some(
+                    Command::new("powershell")
+                        .args(["get-clipboard"])
+                        .output()
+                        .expect("failed to get clipboard"),
+                );
             }
         }
         None
     }
     #[cfg(target_os = "macos")]
-    fn access_clipboard() -> Option<Output>  {
-        Some(Command::new("pbpast")
-            .output()
-            .expect("failed to get clipboard"))
+    fn access_clipboard() -> Option<Output> {
+        Some(
+            Command::new("pbpast")
+                .output()
+                .expect("failed to get clipboard"),
+        )
     }
-    
+
     #[cfg(target_os = "windows")]
     fn access_clipboard() -> Option<Output> {
-        Some(Command::new("powershell")
-            .args(["get-clipboard"])
-            .output()
-            .expect("failed to get clipboard"))
+        Some(
+            Command::new("powershell")
+                .args(["get-clipboard"])
+                .output()
+                .expect("failed to get clipboard"),
+        )
     }
 
     pub fn read(&mut self) -> String {
@@ -78,8 +84,10 @@ impl StdinReader {
                 (KeyCode::Char('v'), KeyModifiers::CONTROL) => {
                     let op = Self::access_clipboard();
                     let output = match op {
-                        None => {continue;}
-                        Some(output) => {output}
+                        None => {
+                            continue;
+                        }
+                        Some(output) => output,
                     };
                     let clipboard = {
                         let this = String::from_utf8_lossy(&output.stdout).to_string();
@@ -182,11 +190,11 @@ impl StdinReader {
         if !consult_history {
             self.history_input_position = self.buf.len() + 1;
         }
-        
+
         if !line.is_empty() {
             self.lineno += 1;
             self.buf.push(line);
-            return self.buf.last().cloned().unwrap_or_default()
+            return self.buf.last().cloned().unwrap_or_default();
         }
         "".to_string()
     }
