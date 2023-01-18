@@ -146,6 +146,10 @@ impl Input {
         GLOBAL_STDIN.insert_whitespace(whitespace);
     }
 
+    pub fn set_indent(&self, indent: usize) {
+        GLOBAL_STDIN.set_indent(indent);
+    }
+
     pub fn enclosed_name(&self) -> &str {
         match self {
             Self::File(filename) => filename.to_str().unwrap_or("_"),
