@@ -51,7 +51,7 @@ impl StdinReader {
                 return "".to_string();
             }
         }
-        "".to_string
+        "".to_string()
     }
     #[cfg(target_os = "macos")]
     fn access_clipboard() -> String {
