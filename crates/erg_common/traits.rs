@@ -620,8 +620,6 @@ pub trait Runnable: Sized + Default {
                         .write_all(instance.start_message().as_bytes())
                         .unwrap();
                 }
-                output.write_all(instance.ps1().as_bytes()).unwrap();
-                output.flush().unwrap();
                 let mut vm = VirtualMachine::new();
                 loop {
                     let indent = vm.indent();
