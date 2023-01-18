@@ -44,8 +44,7 @@ impl StdinReader {
                     let this = String::from_utf8_lossy(&output.stdout).to_string();
                     this.trim_matches(|c: char| c.is_whitespace())
                         .to_string()
-                        .replace('\n', "")
-                        .replace('\r', "")
+                        .replace(['\n', '\r'], "")
                 };
             } else {
                 return "".to_string();
@@ -62,8 +61,7 @@ impl StdinReader {
             let this = String::from_utf8_lossy(&output.stdout).to_string();
             this.trim_matches(|c: char| c.is_whitespace())
                 .to_string()
-                .replace('\n', "")
-                .replace('\r', "")
+                .replace(['\n', '\r'], "")
         }
     }
     
@@ -77,8 +75,7 @@ impl StdinReader {
             let this = String::from_utf8_lossy(&output.stdout).to_string();
             this.trim_matches(|c: char| c.is_whitespace())
                 .to_string()
-                .replace('\n', "")
-                .replace('\r', "")
+                .replace(['\n', '\r'], "")
         }
     }
 
