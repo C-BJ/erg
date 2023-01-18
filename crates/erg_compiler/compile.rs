@@ -6,7 +6,7 @@ use std::path::Path;
 use erg_common::config::ErgConfig;
 use erg_common::error::MultiErrorDisplay;
 use erg_common::log;
-use erg_common::traits::{Runnable, Stream};
+use erg_common::traits::{BlockKind, Runnable, Stream};
 
 use crate::artifact::{CompleteArtifact, ErrorArtifact};
 use crate::context::ContextProvider;
@@ -157,6 +157,40 @@ impl Runnable for Compiler {
             })?;
         warns.fmt_all_stderr();
         Ok(0)
+    }
+
+    #[inline]
+    fn expect_block(&self, src: &str) -> BlockKind {
+        let multi_line_str = "\"\"\"";
+        if src.contains(multi_line_str) && src.rfind(multi_line_str) == src.find(multi_line_str) {
+            return BlockKind::MultiLineStr;
+        }
+        if src.ends_with("do!:") && !src.starts_with("do!:") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with("do:") && !src.starts_with("do:") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with(':') && !src.starts_with(':') {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with('=') && !src.starts_with('=') {
+            return BlockKind::Assignment;
+        }
+        if src.ends_with('.') && !src.starts_with('.') {
+            return BlockKind::ClassPub;
+        }
+        if src.ends_with("::") && !src.starts_with("::") {
+            return BlockKind::ClassPriv;
+        }
+        if src.ends_with("=>") && !src.starts_with("=>") {
+            return BlockKind::Lambda;
+        }
+        if src.ends_with("->") && !src.starts_with("->") {
+            return BlockKind::Lambda;
+        }
+
+        BlockKind::None
     }
 
     fn eval(&mut self, src: String) -> Result<String, CompileErrors> {
