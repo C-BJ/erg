@@ -583,11 +583,7 @@ pub trait Runnable: Sized + Default {
                     unsafe {
                         IN_BLOCK = in_block;
                     }
-                    let line_t = chomp(&instance.cfg_mut().input.read());
-                    let line = {
-                        let this = &line_t;
-                        this.trim_matches(|c: char| c.is_whitespace()).to_string()
-                    };
+                    let line = chomp(&instance.cfg_mut().input.read());
                     match &line[..] {
                         ":clear" | ":cls" => {
                             output.write_all("\x1b[2J\x1b[1;1H".as_bytes()).unwrap();

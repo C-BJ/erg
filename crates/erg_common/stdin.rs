@@ -183,10 +183,6 @@ impl StdinReader {
             execute!(output, MoveToColumn(position as u16 + 4)).unwrap();
         }
         crossterm::terminal::disable_raw_mode().unwrap();
-        let line = {
-            let this = &line;
-            this.trim_matches(|c: char| c.is_whitespace()).to_string()
-        };
         if !consult_history {
             self.history_input_position = self.buf.len() + 1;
         }
