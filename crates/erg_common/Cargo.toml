@@ -32,7 +32,7 @@ features = ["consoleapi"]
 
 [dependencies]
 crossterm = "0.25.0"
-terminal-clipboard = "0.3.1"
+copypasta = "0.8.1"
 
 [lib]
 path = "lib.rs"

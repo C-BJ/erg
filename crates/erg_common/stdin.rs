@@ -1,6 +1,8 @@
 use crate::traits::IN_BLOCK;
-use std::{cell::RefCell, env::consts::OS};
+use std::cell::RefCell;
 use std::thread::LocalKey;
+
+use copypasta::{ClipboardContext, ClipboardProvider};
 
 use crossterm::{
     cursor::{CursorShape, MoveToColumn, SetCursorShape},
@@ -48,14 +50,14 @@ impl StdinReader {
                     return ":exit".to_string();
                 }
                 (KeyCode::Char('v'), KeyModifiers::CONTROL) => {
-                    if OS == "linux" {
-                        continue;
-                    }
-                    let clipboard = terminal_clipboard::get_string().unwrap();
+                    let mut ctx = ClipboardContext::new().unwrap();
+                    let clipboard = ctx.get_contents().unwrap();
                     line.insert_str(position, &clipboard);
                     position += clipboard.len();
                 }
-
+                (.., KeyModifiers::CONTROL) => {
+                    continue;
+                }
                 (KeyCode::Home, ..) => {
                     position = 0;
                 }
