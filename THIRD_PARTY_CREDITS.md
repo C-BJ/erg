@@ -505,6 +505,11 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 
+## `terminal-clipboard`
+* Source code is available at [https://github.com/Canop/terminal-clipboard](https://github.com/Canop/terminal-clipboard)
+* license: MIT
+
+
 ## `winapi`
 
 * Source code is available at [https://github.com/retep998/winapi-rs](https://github.com/retep998/winapi-rs)

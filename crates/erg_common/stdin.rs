@@ -1,5 +1,5 @@
 use crate::traits::IN_BLOCK;
-use std::cell::RefCell;
+use std::{cell::RefCell, env::consts::OS};
 use std::thread::LocalKey;
 
 use crossterm::{
@@ -47,6 +47,15 @@ impl StdinReader {
                     execute!(output, Print("\n".to_string())).unwrap();
                     return ":exit".to_string();
                 }
+                (KeyCode::Char('v'), KeyModifiers::CONTROL) => {
+                    if OS == "linux" {
+                        continue;
+                    }
+                    let clipboard = terminal_clipboard::get_string().unwrap();
+                    line.insert_str(position, &clipboard);
+                    position += clipboard.len();
+                }
+
                 (KeyCode::Home, ..) => {
                     position = 0;
                 }
