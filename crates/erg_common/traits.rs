@@ -578,11 +578,11 @@ pub trait Runnable: Sized + Default {
                 output.write_all(instance.ps1().as_bytes()).unwrap();
                 output.flush().unwrap();
                 let mut in_block = false;
+                let mut lines = String::new();
                 loop {
                     unsafe {
                         IN_BLOCK = in_block;
                     }
-                    let mut lines = String::new();
                     let line_t = chomp(&instance.cfg_mut().input.read());
                     let line = {
                         let this = &line_t;

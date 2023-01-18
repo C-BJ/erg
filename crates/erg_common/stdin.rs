@@ -2,6 +2,7 @@ use crate::traits::IN_BLOCK;
 use std::cell::RefCell;
 use std::process::Command;
 use std::thread::LocalKey;
+use std::process::Output;
 
 use crossterm::{
     cursor::{CursorShape, MoveToColumn, SetCursorShape},
@@ -29,54 +30,33 @@ pub struct StdinReader {
     history_input: Vec<String>,
     history_input_position: usize,
 }
-
 impl StdinReader {
     #[cfg(target_os = "linux")]
-    fn access_clipboard() -> String {
+    fn access_clipboard() -> Option<Output> {
         if let Ok(str) = std::fs::read("/proc/sys/kernel/osrelease") {
             let str = std::str::from_utf8(&str).unwrap();
             if str.to_ascii_lowercase().contains("microsoft") {
-                let output = Command::new("powershell")
+                return Some(Command::new("powershell")
                     .args(["get-clipboard"])
                     .output()
-                    .expect("failed to get clipboard");
-                return {
-                    let this = String::from_utf8_lossy(&output.stdout).to_string();
-                    this.trim_matches(|c: char| c.is_whitespace())
-                        .to_string()
-                        .replace(['\n', '\r'], "")
-                };
-            } else {
-                return "".to_string();
+                    .expect("failed to get clipboard"));
             }
         }
-        "".to_string()
+        None
     }
     #[cfg(target_os = "macos")]
-    fn access_clipboard() -> String {
-        let output = Command::new("pbpast")
+    fn access_clipboard() -> Option<Output>  {
+        Some(Command::new("pbpast")
             .output()
-            .expect("failed to get clipboard");
-        {
-            let this = String::from_utf8_lossy(&output.stdout).to_string();
-            this.trim_matches(|c: char| c.is_whitespace())
-                .to_string()
-                .replace(['\n', '\r'], "")
-        }
+            .expect("failed to get clipboard"))
     }
     
     #[cfg(target_os = "windows")]
-    fn access_clipboard() -> String {
-        let output = Command::new("powershell")
+    fn access_clipboard() -> Option<Output> {
+        Some(Command::new("powershell")
             .args(["get-clipboard"])
             .output()
-            .expect("failed to get clipboard");
-        {
-            let this = String::from_utf8_lossy(&output.stdout).to_string();
-            this.trim_matches(|c: char| c.is_whitespace())
-                .to_string()
-                .replace(['\n', '\r'], "")
-        }
+            .expect("failed to get clipboard"))
     }
 
     pub fn read(&mut self) -> String {
@@ -97,7 +77,17 @@ impl StdinReader {
                     return ":exit".to_string();
                 }
                 (KeyCode::Char('v'), KeyModifiers::CONTROL) => {
-                    let clipboard = Self::access_clipboard();
+                    let op = Self::access_clipboard();
+                    let output = match op {
+                        None => {continue;}
+                        Some(output) => {output}
+                    };
+                    let clipboard = {
+                        let this = String::from_utf8_lossy(&output.stdout).to_string();
+                        this.trim_matches(|c: char| c.is_whitespace())
+                            .to_string()
+                            .replace(['\n', '\r'], "")
+                    };
                     line.insert_str(position, &clipboard);
                     position += clipboard.len();
                 }
