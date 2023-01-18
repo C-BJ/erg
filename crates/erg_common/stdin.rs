@@ -146,8 +146,11 @@ impl StdinReader {
                         continue;
                     }
                     self.history_input_position -= 1;
-                    if let Some(line) = self.buf.get(self.history_input_position) {
-                        position = line.len();
+                    execute!(stdout, MoveToColumn(4), Clear(ClearType::UntilNewLine))?;
+                    if let Some(l) = self.buf.get(self.history_input_position) {
+                        position = l.len();
+                        line.clear();
+                        line.push_str(l);
                     }
                 }
                 (KeyCode::Down, _) => {
@@ -161,8 +164,11 @@ impl StdinReader {
                         continue;
                     }
                     self.history_input_position += 1;
+                    execute!(stdout, MoveToColumn(4), Clear(ClearType::UntilNewLine))?;
                     if let Some(l) = self.buf.get(self.history_input_position) {
                         position = l.len();
+                        line.clear();
+                        line.push_str(l);
                     }
                 }
                 (KeyCode::Left, _) => {
