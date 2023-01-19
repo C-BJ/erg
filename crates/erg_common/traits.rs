@@ -633,7 +633,8 @@ pub trait Runnable: Sized + Default {
                     }
                     instance.cfg().input.set_indent(vm.length);
                     let line = chomp(&instance.cfg_mut().input.read());
-                    match &line[..] {
+                    let line = line.trim_end();
+                    match line {
                         ":quit" | ":exit" => {
                             instance.quit_successfully(output);
                         }
@@ -645,7 +646,7 @@ pub trait Runnable: Sized + Default {
                             continue;
                         }
                         "@Inheritable" | "@Override" => {
-                            vm.push_code(&line);
+                            vm.push_code(line);
                             vm.push_code("\n");
                             vm.push_block_kind(BlockKind::AtMark);
                             continue;
