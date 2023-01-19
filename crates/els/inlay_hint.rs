@@ -224,13 +224,16 @@ impl<Checker: BuildRunnable> Server<Checker> {
     fn get_call_hint(&self, call: &Call) -> Vec<InlayHint> {
         let mut result = vec![];
         let call_t = call.signature_t().unwrap();
-        let nd_ts = call_t.non_default_params().unwrap();
+        let param_ts = call_t.non_var_params().unwrap();
         let is_method = call.is_method_call();
         for (i, pos_arg) in call.args.pos_args.iter().enumerate() {
             let arg_is_lambda = matches!(&pos_arg.expr, Expr::Lambda(_));
             result.extend(self.get_expr_hint(&pos_arg.expr));
             let index = if is_method { i + 1 } else { i };
-            if let Some(name) = nd_ts.get(index).and_then(|pt| pt.name()) {
+            if let Some(name) = param_ts.clone().nth(index).and_then(|pt| pt.name()) {
+                // f i -> ...
+                // NG: f(proc:= i: T): U -> ...
+                // OK: f proc:= (i: T): U -> ...
                 let (name, col_begin) = if arg_is_lambda {
                     (
                         format!(" {name}"),
