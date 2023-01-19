@@ -10,7 +10,7 @@ fn exec_repl_helloworld() -> Result<(), ()> {
 fn exec_repl_def_func() -> Result<(), ()> {
     expect_repl_success(vec![
         "f i =".into(),
-        "    i + 1".into(),
+        "i + 1".into(),
         "".into(),
         "x = f 2".into(),
         "assert x == 3".into(),
