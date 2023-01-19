@@ -29,6 +29,7 @@ pub struct StdinReader {
     lineno: usize,
     buf: Vec<String>,
     history_input_position: usize,
+    indent: u16,
 }
 impl StdinReader {
     #[cfg(target_os = "linux")]
@@ -114,12 +115,12 @@ impl StdinReader {
                     };
                     line.insert_str(position, &clipboard);
                     position += clipboard.len();
-                },
+                }
                 (_, KeyModifiers::CONTROL) => continue,
                 (KeyCode::Tab, _) => {
                     line.insert_str(position, "    ");
                     position += 4;
-                },
+                }
                 (KeyCode::Home, _) => {
                     position = 0;
                 }
@@ -145,8 +146,11 @@ impl StdinReader {
                         continue;
                     }
                     self.history_input_position -= 1;
-                    if let Some(line) = self.buf.get(self.history_input_position) {
-                        position = line.len();
+                    execute!(stdout, MoveToColumn(4), Clear(ClearType::UntilNewLine))?;
+                    if let Some(l) = self.buf.get(self.history_input_position) {
+                        position = l.len();
+                        line.clear();
+                        line.push_str(l);
                     }
                 }
                 (KeyCode::Down, _) => {
@@ -157,12 +161,14 @@ impl StdinReader {
                         *line = "".to_string();
                         position = 0;
                         self.history_input_position += 1;
-                        print!("{}\r", Clear(ClearType::CurrentLine));
                         continue;
                     }
                     self.history_input_position += 1;
+                    execute!(stdout, MoveToColumn(4), Clear(ClearType::UntilNewLine))?;
                     if let Some(l) = self.buf.get(self.history_input_position) {
                         position = l.len();
+                        line.clear();
+                        line.push_str(l);
                     }
                 }
                 (KeyCode::Left, _) => {
@@ -191,8 +197,9 @@ impl StdinReader {
                 stdout,
                 MoveToColumn(4),
                 Clear(ClearType::UntilNewLine),
+                MoveToColumn(self.indent * 4),
                 Print(line.to_owned()),
-                MoveToColumn(position as u16 + 4)
+                MoveToColumn(self.indent * 4 + position as u16)
             )?;
         }
         if !consult_history {
@@ -214,7 +221,7 @@ impl StdinReader {
 }
 
 thread_local! {
-    static READER: RefCell<StdinReader> = RefCell::new(StdinReader{ block_begin: 1, lineno: 1, buf: vec![], history_input_position: 1 });
+    static READER: RefCell<StdinReader> = RefCell::new(StdinReader{ block_begin: 1, lineno: 1, buf: vec![], history_input_position: 1, indent: 1 });
 }
 
 #[derive(Debug)]
@@ -246,6 +253,10 @@ impl GlobalStdin {
 
     pub fn set_block_begin(&'static self, n: usize) {
         self.0.with(|s| s.borrow_mut().block_begin = n);
+    }
+
+    pub fn set_indent(&'static self, n: usize) {
+        self.0.with(|s| s.borrow_mut().indent = n as u16);
     }
 
     pub fn insert_whitespace(&'static self, whitespace: &str) {

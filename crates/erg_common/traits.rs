@@ -631,6 +631,7 @@ pub trait Runnable: Sized + Default {
                         output.write_all(instance.ps1().as_bytes()).unwrap();
                         output.flush().unwrap();
                     }
+                    instance.cfg().input.set_indent(vm.length);
                     let line = chomp(&instance.cfg_mut().input.read());
                     match &line[..] {
                         ":quit" | ":exit" => {
