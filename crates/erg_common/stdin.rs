@@ -161,6 +161,14 @@ impl StdinReader {
                         *line = "".to_string();
                         position = 0;
                         self.history_input_position += 1;
+                        execute!(
+                            stdout,
+                            MoveToColumn(4),
+                            Clear(ClearType::UntilNewLine),
+                            MoveToColumn(self.indent * 4),
+                            Print(line.to_owned()),
+                            MoveToColumn(self.indent * 4 + position as u16)
+                        )?;
                         continue;
                     }
                     self.history_input_position += 1;
