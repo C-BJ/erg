@@ -753,7 +753,6 @@ pub trait Runnable: Sized + Default {
                                 {
                                     instance.quit_successfully(output);
                                 }
-                                println!("{}", errs.len());
                                 errs.fmt_all_stderr();
                             }
                         }
