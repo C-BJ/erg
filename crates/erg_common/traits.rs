@@ -687,7 +687,7 @@ pub trait Runnable: Sized + Default {
                     let line = if let Some(comment_start) = line.find('#') {
                         &line[..comment_start]
                     } else {
-                        &line[..]
+                        line
                     };
                     let bk = instance.expect_block(line);
                     match bk {
