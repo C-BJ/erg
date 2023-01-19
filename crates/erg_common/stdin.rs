@@ -47,8 +47,9 @@ impl StdinReader {
             }
         }
         Command::new("xsel")
-                .args(["--output", "--clipboard"])
-                .output().ok()
+            .args(["--output", "--clipboard"])
+            .output()
+            .ok()
     }
     #[cfg(target_os = "macos")]
     fn access_clipboard() -> Option<Output> {
