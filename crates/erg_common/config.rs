@@ -92,7 +92,7 @@ impl DummyStdin {
         }
         let line = self.lines[self.current_line].clone();
         self.current_line += 1;
-        Some(line)
+        println!("{}", line);
     }
 
     pub fn reread_lines(&self, ln_begin: usize, ln_end: usize) -> Vec<String> {
