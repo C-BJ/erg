@@ -502,13 +502,13 @@ pub fn from_str(bk: &str) -> BlockKind {
 }
 
 pub struct VirtualMachine {
-    codes: String,
-    now_block: Vec<BlockKind>,
-    now: BlockKind,
-    length: usize,
+    pub codes: String,
+    pub now_block: Vec<BlockKind>,
+    pub now: BlockKind,
+    pub length: usize,
 }
 impl VirtualMachine {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             codes: String::new(),
             now_block: vec![BlockKind::Main],
@@ -517,30 +517,30 @@ impl VirtualMachine {
         }
     }
 
-    fn push_block_kind(&mut self, bk: BlockKind) {
+    pub fn push_block_kind(&mut self, bk: BlockKind) {
         self.now = bk;
         self.now_block.push(bk);
         self.length += 1;
     }
 
-    fn remove_block_kind(&mut self) {
+    pub fn remove_block_kind(&mut self) {
         self.now_block.pop().unwrap();
         self.now = *self.now_block.last().unwrap();
         self.length -= 1;
     }
 
-    fn push_code(&mut self, src: &str) {
+    pub fn push_code(&mut self, src: &str) {
         self.codes.push_str(src)
     }
 
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.codes = String::new();
         self.now_block = vec![BlockKind::Main];
         self.now = BlockKind::Main;
         self.length = 1;
     }
 
-    fn indent(&self) -> String {
+    pub fn indent(&self) -> String {
         if self.now == BlockKind::MultiLineStr {
             String::new()
         } else if self.now_block.contains(&BlockKind::AtMark) {

@@ -27,6 +27,19 @@ pub(crate) fn expect_repl_success(lines: Vec<String>) -> Result<(), ()> {
     }
 }
 
+pub(crate) fn expect_repl_unsuccess(lines: Vec<String>, errs_len: usize) -> Result<(), ()> {
+    match exec_repl(lines) {
+        Ok(_) => Err(()),
+        Err(errs) => {
+            if errs.len() == errs_len {
+                return Ok(());
+            }
+            println!("err: error length is not {errs_len} but {}", errs.len());
+            Err(())
+        }
+    }
+}
+
 pub(crate) fn expect_success(file_path: &'static str) -> Result<(), ()> {
     match exec_file(file_path) {
         Ok(0) => Ok(()),
@@ -121,8 +134,7 @@ pub fn _exec_repl(lines: Vec<String>) -> Result<i32, CompileErrors> {
         quiet_repl: true,
         ..Default::default()
     };
-    <DummyVM as Runnable>::run(set_cfg(cfg));
-    Ok(0)
+    DummyVM::dummy_run(set_cfg(cfg))
 }
 
 pub(crate) fn exec_file(file_path: &'static str) -> Result<i32, CompileErrors> {
